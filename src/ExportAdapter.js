@@ -2,11 +2,23 @@
 // Parse database.
 
 var mongodb = require('mongodb');
+
 var MongoClient = mongodb.MongoClient;
+
+var gcloud = require('gcloud')({
+  projectId: 'pgcs-1227',
+  keyFilename: '../key.json'
+});
+
+var datastore = gcloud.datastore;
+
+var dataset = datastore.dataset();
+
 var Parse = require('parse/node')
   .Parse;
 
 var Schema = require('./Schema');
+
 var transform = require('./transform');
 
 // options can contain:

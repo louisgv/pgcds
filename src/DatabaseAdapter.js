@@ -22,13 +22,6 @@ var dbConnections = {};
 var databaseURI = 'mongodb://localhost:27017/parse';
 var appDatabaseURIs = {};
 
-var gcloud = require('gcloud')({
-  projectId: 'grape-spaceship-123',
-  keyFilename: '/path/to/keyfile.json'
-});
-
-var datastore = gcloud.datastore;
-
 
 function setAdapter(databaseAdapter) {
   adapter = databaseAdapter;
@@ -48,17 +41,24 @@ function getDatabaseConnection(appId) {
   }
 
   var dbURI = (appDatabaseURIs[appId] ? appDatabaseURIs[appId] : databaseURI);
+
   dbConnections[appId] = new adapter(dbURI, {
     collectionPrefix: cache.apps[appId]['collectionPrefix']
   });
+
   dbConnections[appId].connect();
+
   return dbConnections[appId];
 }
 
 module.exports = {
   dbConnections: dbConnections,
+
   getDatabaseConnection: getDatabaseConnection,
+
   setAdapter: setAdapter,
+
   setDatabaseURI: setDatabaseURI,
+
   setAppDatabaseURI: setAppDatabaseURI
 };
