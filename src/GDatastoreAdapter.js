@@ -1,3 +1,7 @@
+function returnsTrue() {
+  return true;
+}
+
 // * a constructor with signature (connectionString, optionsObject)
 // * connect()
 // * loadSchema()
@@ -11,8 +15,6 @@
 
 var gcloud = require('gcloud');
 
-var dataset = datastore.dataset();
-
 var Parse = require('parse/node')
   .Parse;
 
@@ -24,6 +26,7 @@ var transform = require('./transform');
 //   namespace: the string to put in front of every collection name.
 function ExportAdapter(projectId, options = {}) {
 
+  this.projectId = projectId;
   this.namespace = options.namespace;
 
   // We don't want a mutable this.schema, because then you could have
@@ -41,31 +44,42 @@ function ExportAdapter(projectId, options = {}) {
 // promise resolves successfully.
 ExportAdapter.prototype.connect = function () {
 
-  this.ds = datastore.dataset({
-    projectId: 'pgcs-1227',
+  this.ds = gcloud.datastore.dataset({
+    projectId: projectId,
+    namespace : this.namespace,
     keyFilename: '../key.json'
   });
 
 };
 
-// Returns a promise for a Mongo collection.
+
+// Returns a promise for a schema object.
+// If we are provided a acceptor, then we run it on the schema.
+// If the schema isn't accepted, we reload it at most once.
+ExportAdapter.prototype.loadSchema = function (acceptor = returnsTrue) {
+  // XXX : IS THERE A SCHEMA in GDS?
+};
+
+// Runs an update on the database.
+// Returns a promise for an object with the new values for field
+// modifications that don't know their results ahead of time, like
+// 'increment'.
+// Options:
+//   acl:  a list of strings. If the object to be updated has an ACL,
+//         one of the provided strings must provide the caller with
+//         write permissions.
+ExportAdapter.prototype.update = function (className, query, update, options) {
+
+};
+
+
+// Returns a promise for a Datastore.
 // Generally just for internal use.
 ExportAdapter.prototype.collection = function (className) {
 
 };
 
 ExportAdapter.prototype.rawCollection = function (className) {
-
-};
-
-function returnsTrue() {
-  return true;
-}
-
-// Returns a promise for a schema object.
-// If we are provided a acceptor, then we run it on the schema.
-// If the schema isn't accepted, we reload it at most once.
-ExportAdapter.prototype.loadSchema = function (acceptor = returnsTrue) {
 
 };
 
@@ -91,17 +105,6 @@ ExportAdapter.prototype.untransformObject = function (
 
 };
 
-// Runs an update on the database.
-// Returns a promise for an object with the new values for field
-// modifications that don't know their results ahead of time, like
-// 'increment'.
-// Options:
-//   acl:  a list of strings. If the object to be updated has an ACL,
-//         one of the provided strings must provide the caller with
-//         write permissions.
-ExportAdapter.prototype.update = function (className, query, update, options) {
-
-};
 
 // Processes relation-updating operations from a REST-format update.
 // Returns a promise that resolves successfully when these are

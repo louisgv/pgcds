@@ -21,7 +21,7 @@ var ExportAdapter = require('./GDatastoreAdapter');
 
 var adapter = ExportAdapter;
 
-var databaseURI = 'mongodb://localhost:27017/parse';
+var databaseURI = 'pgcs-1227';
 
 var cache = require('./cache');
 
