@@ -37,7 +37,7 @@ if (process.env.PARSE_SERVER_OPTIONS) {
 	};
 }
 
-var mountPath = process.env.PARSE_SERVER_MOUNT_PATH || "/";
+var mountPath = process.env.PARSE_SERVER_MOUNT_PATH || "/parse/1";
 var api = new ParseServer(options);
 app.use(mountPath, api);
 

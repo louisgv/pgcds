@@ -14,14 +14,20 @@
 //
 // Default is ExportAdapter, which uses mongo.
 
-var ExportAdapter = require('./ExportAdapter');
+// var ExportAdapter = require('./ExportAdapter');
+
+
+var ExportAdapter = require('./GDatastoreAdapter');
 
 var adapter = ExportAdapter;
-var cache = require('./cache');
-var dbConnections = {};
-var databaseURI = 'mongodb://localhost:27017/parse';
-var appDatabaseURIs = {};
 
+var databaseURI = 'mongodb://localhost:27017/parse';
+
+var cache = require('./cache');
+
+var dbConnections = {};
+
+var appDatabaseURIs = {};
 
 function setAdapter(databaseAdapter) {
   adapter = databaseAdapter;
