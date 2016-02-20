@@ -46,7 +46,7 @@ ExportAdapter.prototype.connect = function () {
 
   this.ds = gcloud.datastore.dataset({
     projectId: projectId,
-    namespace : this.namespace,
+    namespace: this.namespace,
     keyFilename: '../key.json'
   });
 
@@ -65,13 +65,97 @@ ExportAdapter.prototype.loadSchema = function (acceptor = returnsTrue) {
 // modifications that don't know their results ahead of time, like
 // 'increment'.
 // Options:
-//   acl:  a list of strings. If the object to be updated has an ACL,
-//         one of the provided strings must provide the caller with
-//         write permissions.
+// * update(className, query, update, options)
+
+// XXX: className, query, update, options What ARE EACH OF THESE SHIT??
+
 ExportAdapter.prototype.update = function (className, query, update, options) {
+
+  var key = dataset.key('Company');
+
+  dataset.update({
+    key: key,
+    data: {
+      rating: '10'
+    }
+  }, function (err) {
+    console.log(key.path); // [ 'Company', 5669468231434240 ]
+    console.log(key.namespace); // undefined
+  });
+
+
+  this.ds.update()
+};
+
+// * create(className, object)
+
+// Inserts an object into the database.
+// Returns a promise that resolves successfully iff the object saved.
+ExportAdapter.prototype.create = function (className, object, options) {
+  var key = dataset.key(className);
+
+  this.ds.save({
+      key: key,
+      data: object
+    }, function (err) {
+      if(err)
+        new Parse.Error(Parse.Error.OBJECT_NOT_FOUND, 'FUCK!.'));
+  });
 
 };
 
+// Runs a query on the database.
+// Returns a promise that resolves to a list of items.
+// Options:
+//   skip    number of results to skip.
+//   limit   limit to this number of results.
+//   sort    an object where keys are the fields to sort by.
+//           the value is +1 for ascending, -1 for descending.
+//   count   run a count instead of returning results.
+//   acl     restrict this operation with an ACL for the provided array
+//           of user objectIds and roles. acl: null means no user.
+//           when this field is not present, don't do anything regarding ACLs.
+// TODO: make userIds not needed here. The db adapter shouldn't know
+// anything about users, ideally. Then, improve the format of the ACL
+// arg to work like the others.
+ExportAdapter.prototype.find = function (className, query, options = {}) {
+  var query = this.ds.createQuery(className, query);
+
+  var callback = function (err, entities, nextQuery, apiResponse) {
+    if(nextQuery) {
+      // More results might exist, so we'll manually fetch them
+      this.ds.runQuery(nextQuery, callback);
+    }
+  };
+
+  this.ds.runQuery(query, callback);
+};
+
+// * destroy(className, query, options)
+
+
+// Removes objects matches this query from the database.
+// Returns a promise that resolves successfully iff the object was
+// deleted.
+// Options:
+//   acl:  a list of strings. If the object to be updated has an ACL,
+//         one of the provided strings must provide the caller with
+//         write permissions.
+ExportAdapter.prototype.destroy = function (className, query, options = {}) {
+  var query = this.ds.createQuery(className, query);
+
+  var callback = function (err, entities, nextQuery, apiResponse) {
+    if(nextQuery) {
+      // More results might exist, so we'll manually fetch them
+      this.ds.delete(this.ds.key(['Company', 123]), function (err, apiResp) {
+
+      });
+      this.ds.runQuery(nextQuery, callback);
+    }
+  };
+
+  this.ds.runQuery(query, callback);
+};
 
 // Returns a promise for a Datastore.
 // Generally just for internal use.
@@ -130,22 +214,6 @@ ExportAdapter.prototype.removeRelation = function (key, fromClassName, fromId, t
 
 };
 
-// Removes objects matches this query from the database.
-// Returns a promise that resolves successfully iff the object was
-// deleted.
-// Options:
-//   acl:  a list of strings. If the object to be updated has an ACL,
-//         one of the provided strings must provide the caller with
-//         write permissions.
-ExportAdapter.prototype.destroy = function (className, query, options = {}) {
-
-};
-
-// Inserts an object into the database.
-// Returns a promise that resolves successfully iff the object saved.
-ExportAdapter.prototype.create = function (className, object, options) {
-
-};
 
 // Runs a mongo query on the database.
 // This should only be used for testing - use 'find' for normal code
@@ -199,24 +267,6 @@ ExportAdapter.prototype.reduceRelationKeys = function (className, query) {
 // This could be improved a lot but it's not clear if that's a good
 // idea. Or even if this behavior is a good idea.
 ExportAdapter.prototype.smartFind = function (coll, where, options) {
-
-};
-
-// Runs a query on the database.
-// Returns a promise that resolves to a list of items.
-// Options:
-//   skip    number of results to skip.
-//   limit   limit to this number of results.
-//   sort    an object where keys are the fields to sort by.
-//           the value is +1 for ascending, -1 for descending.
-//   count   run a count instead of returning results.
-//   acl     restrict this operation with an ACL for the provided array
-//           of user objectIds and roles. acl: null means no user.
-//           when this field is not present, don't do anything regarding ACLs.
-// TODO: make userIds not needed here. The db adapter shouldn't know
-// anything about users, ideally. Then, improve the format of the ACL
-// arg to work like the others.
-ExportAdapter.prototype.find = function (className, query, options = {}) {
 
 };
 
